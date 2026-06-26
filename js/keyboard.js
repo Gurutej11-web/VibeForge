@@ -1,28 +1,35 @@
-// Playable Keyboard
 window.Keyboard = (() => {
   let octave = 4;
-  let scale = ['C', 'D', 'E', 'G', 'A']; // default pentatonic
+  let activeScale = 'minor';
   let recordMode = false;
-  let activeKeys = new Set();
+  let heldKeys = new Set();
 
+  const SCALE_INTERVALS = {
+    major:      [0,2,4,5,7,9,11],
+    minor:      [0,2,3,5,7,8,10],
+    pentatonic: [0,2,4,7,9],
+    blues:      [0,3,5,6,7,10],
+    dorian:     [0,2,3,5,7,9,10],
+    mixolydian: [0,2,4,5,7,9,10]
+  };
+
+  const CHROMATIC = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
   const WHITE_NOTES = ['C','D','E','F','G','A','B'];
-  const BLACK_NOTES = { 'C#': 1, 'D#': 2, 'F#': 4, 'G#': 5, 'A#': 6 }; // after white key index
+  const WHITE_TO_SEMITONE = {C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+  const BLACK_POSITIONS = {C:0,D:1,F:3,G:4,A:5};
 
   const KEY_MAP = {
-    'a': 'C', 'w': 'C#', 's': 'D', 'e': 'D#', 'd': 'E',
-    'f': 'F', 't': 'F#', 'g': 'G', 'y': 'G#', 'h': 'A',
-    'u': 'A#', 'j': 'B', 'k': 'C+1'
+    'a':'C','w':'C#','s':'D','e':'D#','d':'E','f':'F','t':'F#',
+    'g':'G','y':'G#','h':'A','u':'A#','j':'B','k':'C+1'
   };
 
-  const NOTE_FREQS = {
-    C: 261.63, 'C#': 277.18, D: 293.66, 'D#': 311.13, E: 329.63,
-    F: 349.23, 'F#': 369.99, G: 392.00, 'G#': 415.30, A: 440.00,
-    'A#': 466.16, B: 493.88
-  };
+  function noteFreq(semitone, oct) {
+    return 261.63 * Math.pow(2, (semitone - 0 + (oct - 4) * 12) / 12);
+  }
 
-  function noteFreq(note, oct) {
-    const base = NOTE_FREQS[note] || 261.63;
-    return base * Math.pow(2, oct - 4);
+  function isInScale(semitone) {
+    const intervals = SCALE_INTERVALS[activeScale] || SCALE_INTERVALS.minor;
+    return intervals.includes(semitone % 12);
   }
 
   function render() {
@@ -30,78 +37,71 @@ window.Keyboard = (() => {
     if (!container) return;
     container.innerHTML = '';
 
-    const octaves = 2;
-    for (let o = 0; o < octaves; o++) {
+    for (let o = 0; o < 2; o++) {
       const oct = octave + o;
-      const wrap = document.createElement('div');
-      wrap.style.cssText = 'display:flex;position:relative;flex:1;';
+      const group = document.createElement('div');
+      group.className = 'octave-group';
+      group.style.cssText = 'display:flex;position:relative;flex:1;';
 
       WHITE_NOTES.forEach((note, wi) => {
+        const semi = WHITE_TO_SEMITONE[note];
+        const inScale = isInScale(semi);
         const key = document.createElement('div');
-        const inScale = scale.includes(note);
         key.className = `white-key${inScale ? ' in-scale' : ''}`;
-        key.dataset.note = note;
-        key.dataset.oct = oct;
+        key.dataset.note = note; key.dataset.oct = oct;
 
         const label = document.createElement('span');
         label.className = 'key-label';
         label.textContent = wi === 0 ? `${note}${oct}` : '';
         key.appendChild(label);
 
-        key.addEventListener('mousedown', e => { e.preventDefault(); triggerNote(note, oct, key); });
-        key.addEventListener('mouseup', () => releaseNote(key));
-        key.addEventListener('mouseleave', () => releaseNote(key));
+        key.addEventListener('mousedown', e => { e.preventDefault(); triggerNote(note, oct, key, semi); });
+        key.addEventListener('mouseup', () => key.classList.remove('pressed'));
+        key.addEventListener('mouseleave', () => key.classList.remove('pressed'));
+        key.addEventListener('touchstart', e => { e.preventDefault(); triggerNote(note, oct, key, semi); });
+        key.addEventListener('touchend', () => key.classList.remove('pressed'));
+        group.appendChild(key);
 
-        wrap.appendChild(key);
-
-        // Black key after this white key?
-        const sharpNote = `${note}#`;
-        if (WHITE_NOTES[wi + 1] && !['E', 'B'].includes(note)) {
+        // Add black key
+        if (!['E','B'].includes(note)) {
+          const sharpNote = note + '#';
+          const sharpSemi = semi + 1;
+          const sharpInScale = isInScale(sharpSemi);
           const bkey = document.createElement('div');
-          bkey.className = `black-key${scale.includes(sharpNote) ? ' in-scale' : ''}`;
-          bkey.dataset.note = sharpNote;
-          bkey.dataset.oct = oct;
-          // Position relative to white key
-          bkey.style.cssText = `left:calc(${(wi + 1) * (100 / WHITE_NOTES.length)}% - 8px);`;
-          bkey.addEventListener('mousedown', e => { e.preventDefault(); triggerNote(sharpNote, oct, bkey); });
-          bkey.addEventListener('mouseup', () => releaseNote(bkey));
-          bkey.addEventListener('mouseleave', () => releaseNote(bkey));
-          wrap.appendChild(bkey);
+          bkey.className = `black-key${sharpInScale ? ' in-scale' : ''}`;
+          bkey.dataset.note = sharpNote; bkey.dataset.oct = oct;
+
+          const keyW = 100 / WHITE_NOTES.length;
+          bkey.style.left = `calc(${(wi + 1) * keyW}% - ${keyW * 0.35}%)`;
+
+          bkey.addEventListener('mousedown', e => { e.preventDefault(); triggerNote(sharpNote, oct, bkey, sharpSemi); });
+          bkey.addEventListener('mouseup', () => bkey.classList.remove('pressed'));
+          bkey.addEventListener('mouseleave', () => bkey.classList.remove('pressed'));
+          group.appendChild(bkey);
         }
       });
-
-      container.appendChild(wrap);
+      container.appendChild(group);
     }
   }
 
-  function triggerNote(note, oct, el) {
-    AudioEngine.init();
-    AudioEngine.resume();
-    const freq = noteFreq(note, oct);
+  function triggerNote(note, oct, el, semi) {
+    AudioEngine.init(); AudioEngine.resume();
+    const freq = noteFreq(semi !== undefined ? semi : 0, oct);
     AudioEngine.playNote(freq, 'triangle', 0.8, 0.4);
     el.classList.add('pressed');
-
     if (recordMode && Sequencer.isPlaying()) {
-      recordToSequencer(note, oct);
+      const step = Sequencer.getCurrentStep();
+      const rows = Sequencer.getRows();
+      const lead = rows.find(r => r.id === 'lead');
+      if (lead) { lead.cells[step] = true; if (lead.notes) lead.notes[step] = `${note}${oct}`; }
     }
+    Arpeggiator?.setChord && arpNoteFreqs([freq]);
   }
 
-  function releaseNote(el) {
-    el.classList.remove('pressed');
-  }
+  function arpNoteFreqs(freqs) { /* called when holding a chord pad */ }
 
-  function recordToSequencer(note, oct) {
-    const rows = Sequencer.getRows();
-    let leadRow = rows.find(r => r.id === 'lead');
-    if (leadRow) {
-      const step = (Sequencer.currentStep || 0);
-      leadRow.cells[step] = true;
-      if (leadRow.notes) leadRow.notes[step] = `${note}${oct}`;
-    }
-  }
-
-  function setScale(notes) {
-    scale = notes;
+  function setScale(scaleName, rootNote) {
+    activeScale = scaleName || 'minor';
     render();
   }
 
@@ -113,39 +113,42 @@ window.Keyboard = (() => {
 
   function setupKeyboard() {
     document.addEventListener('keydown', e => {
-      if (e.repeat || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
-      const noteStr = KEY_MAP[e.key.toLowerCase()];
-      if (!noteStr) return;
+      if (e.repeat || ['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+      const k = e.key.toLowerCase();
+
+      // Octave shortcuts
+      if (k === 'z') { setOctave(octave - 1); return; }
+      if (k === 'x') { setOctave(octave + 1); return; }
+
+      const noteStr = KEY_MAP[k];
+      if (!noteStr || heldKeys.has(k)) return;
+      heldKeys.add(k);
+
       let note = noteStr, oct = octave;
       if (noteStr === 'C+1') { note = 'C'; oct = octave + 1; }
-      if (activeKeys.has(noteStr)) return;
-      activeKeys.add(noteStr);
 
-      const freq = noteFreq(note, oct);
-      AudioEngine.init();
-      AudioEngine.resume();
+      const semi = CHROMATIC.indexOf(note);
+      const freq = noteFreq(semi, oct);
+      AudioEngine.init(); AudioEngine.resume();
       AudioEngine.playNote(freq, 'triangle', 0.8, 0.4);
-
-      // Highlight key
       const keyEl = document.querySelector(`[data-note="${note}"][data-oct="${oct}"]`);
       if (keyEl) keyEl.classList.add('pressed');
     });
 
     document.addEventListener('keyup', e => {
-      const noteStr = KEY_MAP[e.key.toLowerCase()];
+      const k = e.key.toLowerCase();
+      heldKeys.delete(k);
+      const noteStr = KEY_MAP[k];
       if (!noteStr) return;
-      activeKeys.delete(noteStr);
       let note = noteStr, oct = octave;
       if (noteStr === 'C+1') { note = 'C'; oct = octave + 1; }
-      const keyEl = document.querySelector(`[data-note="${note}"][data-oct="${oct}"]`);
-      if (keyEl) keyEl.classList.remove('pressed');
+      document.querySelector(`[data-note="${note}"][data-oct="${oct}"]`)?.classList.remove('pressed');
     });
 
     document.getElementById('oct-up')?.addEventListener('click', () => setOctave(octave + 1));
     document.getElementById('oct-down')?.addEventListener('click', () => setOctave(octave - 1));
-    document.getElementById('kb-record-mode')?.addEventListener('change', e => {
-      recordMode = e.target.checked;
-    });
+    document.getElementById('kb-record-mode')?.addEventListener('change', e => { recordMode = e.target.checked; });
+    document.getElementById('scale-select')?.addEventListener('change', e => setScale(e.target.value));
   }
 
   return { render, setScale, setOctave, setupKeyboard };

@@ -6,32 +6,51 @@
   <title>VibeForge Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/global.css" />
   <link rel="stylesheet" href="css/studio.css" />
 </head>
-<body>
+<body class="studio-body">
+
+  <!-- Cursors -->
+  <div class="cursor-dot" id="cursor-dot"></div>
+  <div class="cursor-ring" id="cursor-ring"></div>
+
+  <!-- Toast -->
+  <div id="toast-container"></div>
+
   <!-- Background Visualizer -->
   <canvas id="visualizer-canvas"></canvas>
 
-  <!-- AI Generation Modal -->
-  <div id="ai-modal" class="modal-overlay">
-    <div class="modal-box">
+  <!-- ===== LOADING SCREEN ===== -->
+  <div id="loading-screen" class="loading-screen">
+    <div class="loading-logo">
+      <div class="loading-icon">⚡</div>
+      <div class="loading-text">VibeForge</div>
+    </div>
+    <div class="loading-bars">
+      <span></span><span></span><span></span><span></span><span></span>
+    </div>
+    <div class="loading-status" id="loading-status">Initializing audio engine...</div>
+  </div>
+
+  <!-- ===== AI GENERATE MODAL ===== -->
+  <div id="ai-modal" class="modal-backdrop hidden">
+    <div class="modal-box ai-modal-box">
       <div class="modal-header">
-        <div class="modal-logo"><span>⚡</span> VibeForge</div>
+        <div class="modal-logo">
+          <span class="logo-mark">⚡</span>
+          <span class="logo-text-sm">VibeForge</span>
+        </div>
         <h2>Generate Your Track</h2>
-        <p>Describe what you want and AI will build your starting point</p>
+        <p>Let Groq AI build your starting point — chords, drums, bassline, and creative direction.</p>
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label>Describe your vibe</label>
-          <textarea id="ai-description" placeholder="e.g. Late night city drive with warm chords and minimal beats..."></textarea>
+          <label>Describe your vibe <span class="label-optional">(optional)</span></label>
+          <textarea id="ai-description" placeholder="e.g. Late night city drive — warm chords, minimal melody, lots of space..."></textarea>
         </div>
-        <div class="form-group" id="api-key-group">
-          <label>Groq API Key</label>
-          <input type="password" id="ai-api-key" placeholder="gsk_..." autocomplete="off" />
-          <span style="font-size:0.72rem;color:var(--text-muted)">Saved locally in your browser • <a href="https://console.groq.com" target="_blank" style="color:var(--accent-cyan)">Get a free key</a></span>
-        </div>
-        <div class="form-row">
+        <div class="form-row-3">
           <div class="form-group">
             <label>Mood</label>
             <select id="ai-mood">
@@ -56,235 +75,421 @@
           </div>
           <div class="form-group">
             <label>BPM</label>
-            <div class="bpm-input-wrap">
+            <div class="input-with-unit">
               <input type="number" id="ai-bpm" value="85" min="60" max="180" />
-              <span class="bpm-label">BPM</span>
+              <span class="input-unit">BPM</span>
             </div>
           </div>
         </div>
-        <button id="ai-generate-btn" class="btn-generate">
-          <span class="btn-generate-icon">✨</span>
-          Generate Track
-        </button>
-        <div id="ai-result" class="ai-result hidden">
-          <div class="ai-direction"></div>
-          <div class="ai-details">
-            <span class="ai-chip" id="ai-scale-chip"></span>
-            <span class="ai-chip" id="ai-chords-chip"></span>
-          </div>
+        <div class="form-group">
+          <label>Groq API Key <span class="label-optional">— <a href="https://console.groq.com" target="_blank">Get free key</a></span></label>
+          <input type="password" id="ai-api-key" placeholder="gsk_..." autocomplete="off" />
         </div>
+
+        <button id="ai-generate-btn" class="btn btn-primary btn-full">
+          <span id="gen-btn-icon">✨</span>
+          <span id="gen-btn-text">Generate Track with AI</span>
+        </button>
+
         <div id="ai-loading" class="ai-loading hidden">
-          <div class="spinner"></div>
+          <div class="ai-loading-bars">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
           <span>Groq is composing your track...</span>
+        </div>
+
+        <div id="ai-result" class="ai-result hidden">
+          <div class="ai-result-quote" id="ai-direction-text"></div>
+          <div class="ai-result-chips">
+            <span class="badge badge-cyan" id="ai-scale-chip"></span>
+            <span class="badge badge-purple" id="ai-chords-chip"></span>
+            <span class="badge badge-green" id="ai-bpm-chip"></span>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button id="modal-skip" class="btn-skip">Skip — Open Blank Studio</button>
-        <button id="modal-load" class="btn-load-track hidden">Load Into Studio →</button>
+        <button id="modal-skip" class="btn btn-ghost">Skip — Open Blank Studio</button>
+        <button id="modal-load" class="btn btn-primary hidden">Load into Studio →</button>
       </div>
     </div>
   </div>
 
-  <!-- Main Studio UI -->
+  <!-- ===== SHORTCUTS OVERLAY ===== -->
+  <div id="shortcuts-modal" class="modal-backdrop hidden">
+    <div class="modal-box shortcuts-box">
+      <div class="shortcuts-header">
+        <h3>⌨️ Keyboard Shortcuts</h3>
+        <button id="close-shortcuts" class="btn-close">✕</button>
+      </div>
+      <div class="shortcuts-grid">
+        <div class="shortcut-group">
+          <div class="shortcut-group-title">Transport</div>
+          <div class="shortcut-row"><kbd>Space</kbd><span>Play / Stop</span></div>
+          <div class="shortcut-row"><kbd>R</kbd><span>Toggle Record</span></div>
+          <div class="shortcut-row"><kbd>↑ ↓</kbd><span>BPM ±1</span></div>
+          <div class="shortcut-row"><kbd>?</kbd><span>Show Shortcuts</span></div>
+        </div>
+        <div class="shortcut-group">
+          <div class="shortcut-group-title">Keyboard (Piano)</div>
+          <div class="shortcut-row"><kbd>A S D F G H J K</kbd><span>White keys C→C</span></div>
+          <div class="shortcut-row"><kbd>W E T Y U</kbd><span>Black keys</span></div>
+          <div class="shortcut-row"><kbd>Z X</kbd><span>Octave down / up</span></div>
+        </div>
+        <div class="shortcut-group">
+          <div class="shortcut-group-title">Drum Pads</div>
+          <div class="shortcut-row"><kbd>Q W E R</kbd><span>Row 1 — Kick, Snare, HH, OH</span></div>
+          <div class="shortcut-row"><kbd>Z X C V</kbd><span>Row 2 — Clap, Tom, Rim, Perc</span></div>
+          <div class="shortcut-row"><kbd>1–8</kbd><span>Rows 3–4</span></div>
+        </div>
+        <div class="shortcut-group">
+          <div class="shortcut-group-title">Studio</div>
+          <div class="shortcut-row"><kbd>Ctrl+S</kbd><span>Save Project</span></div>
+          <div class="shortcut-row"><kbd>Ctrl+Z</kbd><span>Clear Sequencer</span></div>
+          <div class="shortcut-row"><kbd>M</kbd><span>Toggle Mute All</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PIANO ROLL MODAL ===== -->
+  <div id="piano-roll-modal" class="modal-backdrop hidden">
+    <div class="modal-box piano-roll-box">
+      <div class="piano-roll-header">
+        <h3>🎹 Piano Roll — <span id="piano-roll-row-name">Melody</span></h3>
+        <div class="piano-roll-controls">
+          <button class="btn btn-ghost btn-sm" id="pr-clear">Clear</button>
+          <button class="btn btn-ghost btn-sm" id="pr-randomize">Randomize</button>
+          <button class="btn btn-primary btn-sm" id="pr-save">Save & Close</button>
+        </div>
+      </div>
+      <div class="piano-roll-content">
+        <div class="piano-roll-keys" id="pr-keys"></div>
+        <div class="piano-roll-grid-wrap">
+          <div class="piano-roll-grid" id="pr-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== MAIN STUDIO ===== -->
   <div id="studio" class="studio hidden">
 
-    <!-- Transport Bar -->
+    <!-- TRANSPORT BAR -->
     <header class="transport-bar">
       <div class="transport-left">
-        <a href="index.html" class="back-link">
-          <span>⚡</span> VibeForge
+        <a href="index.html" class="studio-logo" title="Back to Home">
+          <span class="logo-mark">⚡</span>
+          <span class="logo-text-sm">VibeForge</span>
         </a>
+        <div class="project-name-wrap">
+          <input type="text" id="project-name" value="Untitled Track" class="project-name-input" spellcheck="false" />
+        </div>
       </div>
+
       <div class="transport-center">
-        <button id="btn-play" class="transport-btn play-btn" title="Play (Space)">▶</button>
-        <button id="btn-stop" class="transport-btn" title="Stop">■</button>
-        <button id="btn-record" class="transport-btn record-btn" title="Record">⏺</button>
-        <div class="bpm-control">
-          <button class="bpm-adj" id="bpm-down">−</button>
-          <div class="bpm-display">
+        <!-- Playback -->
+        <div class="transport-group">
+          <button id="btn-rewind" class="transport-btn" title="Rewind">⏮</button>
+          <button id="btn-play" class="transport-btn play-btn" title="Play (Space)">▶</button>
+          <button id="btn-stop" class="transport-btn" title="Stop">■</button>
+          <button id="btn-record" class="transport-btn record-btn" title="Record (R)">⏺</button>
+        </div>
+
+        <!-- BPM -->
+        <div class="transport-group bpm-group">
+          <button class="bpm-adj" id="bpm-down" title="BPM -1">−</button>
+          <div class="bpm-display" id="bpm-display">
             <span id="bpm-value" class="bpm-number">85</span>
             <span class="bpm-unit">BPM</span>
           </div>
-          <button class="bpm-adj" id="bpm-up">+</button>
+          <button class="bpm-adj" id="bpm-up" title="BPM +1">+</button>
         </div>
-        <div class="time-sig">4/4</div>
-        <div class="step-indicator">
-          <span id="current-step-display">Step <span id="step-num">1</span></span>
+
+        <!-- Time sig + step counter -->
+        <div class="transport-group">
+          <div class="time-sig-display">4/4</div>
+          <div class="step-counter">
+            <span id="step-num" class="step-num-val">1</span>
+            <span class="step-denom">/16</span>
+          </div>
+        </div>
+
+        <!-- Loop + Metronome + Swing -->
+        <div class="transport-group">
+          <button id="btn-loop" class="transport-btn" title="Toggle Loop">↻</button>
+          <button id="btn-metro" class="transport-btn" title="Metronome">🔔</button>
+          <div class="swing-wrap" title="Swing">
+            <span class="swing-label">SWING</span>
+            <input type="range" id="swing-knob" min="0" max="100" value="0" class="swing-slider" />
+            <span class="swing-val" id="swing-val">0%</span>
+          </div>
         </div>
       </div>
+
       <div class="transport-right">
-        <div class="viz-mode-btns">
-          <button class="viz-btn active" data-mode="particles" title="Particle Field">✦</button>
-          <button class="viz-btn" data-mode="waveform" title="Waveform">〜</button>
-          <button class="viz-btn" data-mode="bars" title="Frequency Bars">▌▌▌</button>
+        <!-- Visualizer mode -->
+        <div class="viz-mode-group">
+          <button class="viz-mode-btn active" data-mode="particles" title="Particle Field">✦</button>
+          <button class="viz-mode-btn" data-mode="waveform" title="Waveform">〜</button>
+          <button class="viz-mode-btn" data-mode="bars" title="Frequency Bars">▌▌</button>
         </div>
-        <button id="btn-ai-regen" class="btn-icon-sm" title="AI Generate">🤖</button>
-        <button id="btn-export" class="btn-export" title="Export WAV">⬇ Export</button>
+
+        <!-- Actions -->
+        <button id="btn-ai-regen" class="transport-action-btn" title="AI Generate">🤖 AI</button>
+        <button id="btn-shortcuts" class="transport-action-btn" title="Shortcuts (?)">⌨️</button>
+        <button id="btn-save" class="transport-action-btn" title="Save Project (Ctrl+S)">💾</button>
+        <button id="btn-export" class="export-btn" title="Export Track">
+          <span class="export-btn-fill"></span>
+          ⬇ Export WAV
+        </button>
       </div>
     </header>
 
-    <!-- AI Direction Bar -->
+    <!-- AI DIRECTION BAR -->
     <div id="direction-bar" class="direction-bar hidden">
-      <span class="direction-label">🤖 AI Direction:</span>
-      <span id="direction-text"></span>
+      <span class="direction-icon">🤖</span>
+      <span class="direction-content" id="direction-text"></span>
+      <button id="direction-dismiss" class="direction-dismiss">✕</button>
     </div>
 
-    <!-- Main Content Area -->
-    <div class="studio-main">
+    <!-- STUDIO BODY -->
+    <div class="studio-body-wrap">
 
-      <!-- Left: Chord Pads + Keyboard + Sequencer -->
+      <!-- LEFT COLUMN -->
       <div class="studio-left">
 
-        <!-- Chord Pads -->
-        <div class="panel chord-panel">
+        <!-- CHORD PADS -->
+        <div class="studio-panel chord-panel">
           <div class="panel-header">
-            <span class="panel-title">Chord Pads</span>
-            <span class="panel-hint">Click to play • Hold to sustain</span>
+            <div class="panel-title-row">
+              <span class="panel-icon">🎼</span>
+              <span class="panel-title">Chord Pads</span>
+            </div>
+            <div class="panel-actions">
+              <span class="panel-hint">Click = play · Hold = sustain</span>
+            </div>
           </div>
-          <div class="chord-pads" id="chord-pads">
-            <!-- Generated by JS -->
-          </div>
+          <div class="chord-pads-grid" id="chord-pads"></div>
         </div>
 
-        <!-- Step Sequencer -->
-        <div class="panel sequencer-panel">
+        <!-- STEP SEQUENCER -->
+        <div class="studio-panel sequencer-panel">
           <div class="panel-header">
-            <span class="panel-title">Step Sequencer</span>
-            <div class="seq-controls">
-              <button id="btn-add-row" class="btn-sm">+ Row</button>
+            <div class="panel-title-row">
+              <span class="panel-icon">🎛️</span>
+              <span class="panel-title">Step Sequencer</span>
+            </div>
+            <div class="panel-actions">
               <select id="seq-steps" class="select-sm">
                 <option value="16" selected>16 Steps</option>
                 <option value="32">32 Steps</option>
               </select>
+              <button id="btn-seq-clear" class="action-btn-sm" title="Clear All">Clear</button>
+              <button id="btn-seq-random" class="action-btn-sm" title="Randomize">Random</button>
+              <button id="btn-add-row" class="action-btn-sm accent" title="Add Row">+ Row</button>
             </div>
           </div>
-          <div class="sequencer" id="sequencer">
-            <!-- Rows generated by JS -->
+          <div class="sequencer-scroll">
+            <div id="sequencer" class="sequencer"></div>
           </div>
         </div>
 
-        <!-- Playable Keyboard -->
-        <div class="panel keyboard-panel">
+        <!-- KEYBOARD -->
+        <div class="studio-panel keyboard-panel">
           <div class="panel-header">
-            <span class="panel-title">Keyboard</span>
-            <div class="keyboard-controls">
-              <button class="kb-oct-btn" id="oct-down">Oct −</button>
-              <span id="octave-display" class="kb-oct-val">Oct 4</span>
-              <button class="kb-oct-btn" id="oct-up">Oct +</button>
-              <label class="record-toggle">
+            <div class="panel-title-row">
+              <span class="panel-icon">🎹</span>
+              <span class="panel-title">Keyboard</span>
+            </div>
+            <div class="panel-actions">
+              <div class="key-scale-select">
+                <label class="select-label">Scale</label>
+                <select id="scale-select" class="select-sm">
+                  <option value="major">Major</option>
+                  <option value="minor" selected>Minor</option>
+                  <option value="pentatonic">Pentatonic</option>
+                  <option value="blues">Blues</option>
+                  <option value="dorian">Dorian</option>
+                  <option value="mixolydian">Mixolydian</option>
+                </select>
+              </div>
+              <button class="oct-btn" id="oct-down" title="Octave Down (Z)">Oct−</button>
+              <span id="octave-display" class="oct-val">Oct 4</span>
+              <button class="oct-btn" id="oct-up" title="Octave Up (X)">Oct+</button>
+              <label class="record-label">
                 <input type="checkbox" id="kb-record-mode" />
-                <span>Record</span>
+                <span>Rec</span>
               </label>
             </div>
           </div>
-          <div class="keyboard-wrap">
-            <div class="keyboard" id="keyboard">
-              <!-- Keys generated by JS -->
-            </div>
+          <div class="keyboard-scroll">
+            <div id="keyboard" class="keyboard"></div>
           </div>
         </div>
 
       </div>
 
-      <!-- Right: Mixer + Effects -->
+      <!-- RIGHT COLUMN -->
       <div class="studio-right">
 
-        <!-- Drum Machine -->
-        <div class="panel drum-panel">
+        <!-- DRUM MACHINE -->
+        <div class="studio-panel drum-panel">
           <div class="panel-header">
-            <span class="panel-title">Drum Machine</span>
-            <select id="drum-kit" class="select-sm">
-              <option value="acoustic">Acoustic Kit</option>
-              <option value="electronic" selected>Electronic Kit</option>
-              <option value="lofi">Lo-Fi Kit</option>
-              <option value="trap">Trap Kit</option>
-            </select>
-          </div>
-          <div class="drum-pads" id="drum-pads">
-            <!-- 16 pads by JS -->
-          </div>
-        </div>
-
-        <!-- Mixer -->
-        <div class="panel mixer-panel">
-          <div class="panel-header">
-            <span class="panel-title">Mixer</span>
-          </div>
-          <div class="mixer" id="mixer">
-            <!-- Channel strips by JS -->
-          </div>
-          <div class="master-strip">
-            <div class="master-label">MASTER</div>
-            <div class="master-controls">
-              <div class="master-knob-group">
-                <label>Vol</label>
-                <input type="range" id="master-vol" min="0" max="100" value="80" class="master-fader" />
-              </div>
-              <div class="master-knob-group">
-                <label>Rev</label>
-                <input type="range" id="master-reverb" min="0" max="100" value="20" class="master-fader" />
-              </div>
+            <div class="panel-title-row">
+              <span class="panel-icon">🥁</span>
+              <span class="panel-title">Drum Machine</span>
+            </div>
+            <div class="panel-actions">
+              <select id="drum-kit" class="select-sm">
+                <option value="acoustic">Acoustic</option>
+                <option value="electronic" selected>Electronic</option>
+                <option value="lofi">Lo-Fi</option>
+                <option value="trap">Trap</option>
+              </select>
             </div>
           </div>
+          <div id="drum-pads" class="drum-pads-grid"></div>
         </div>
 
-        <!-- Effects Rack -->
-        <div class="panel effects-panel">
+        <!-- MIXER -->
+        <div class="studio-panel mixer-panel">
           <div class="panel-header">
-            <span class="panel-title">Effects Rack</span>
+            <div class="panel-title-row">
+              <span class="panel-icon">🎚️</span>
+              <span class="panel-title">Mixer</span>
+            </div>
+            <div class="panel-actions">
+              <label class="panel-hint">Master Vol</label>
+              <input type="range" id="master-vol" min="0" max="100" value="80" class="mini-fader" title="Master Volume" />
+            </div>
+          </div>
+          <div id="mixer" class="mixer-strips"></div>
+        </div>
+
+        <!-- EFFECTS RACK -->
+        <div class="studio-panel effects-panel">
+          <div class="panel-header">
+            <div class="panel-title-row">
+              <span class="panel-icon">🔊</span>
+              <span class="panel-title">Effects</span>
+            </div>
           </div>
           <div class="effects-rack">
-            <div class="effect-strip">
-              <div class="effect-toggle-wrap">
-                <input type="checkbox" id="fx-reverb" class="effect-toggle" checked />
-                <label for="fx-reverb" class="effect-name">Reverb</label>
-              </div>
-              <input type="range" id="fx-reverb-amt" min="0" max="100" value="20" class="effect-knob" />
+            <div class="effect-row">
+              <label class="effect-toggle-label">
+                <input type="checkbox" id="fx-reverb" checked class="effect-check" />
+                <span class="effect-toggle-track"></span>
+              </label>
+              <span class="effect-name">Reverb</span>
+              <input type="range" id="fx-reverb-amt" min="0" max="100" value="20" class="effect-slider" />
               <span class="effect-val" id="fx-reverb-val">20%</span>
             </div>
-            <div class="effect-strip">
-              <div class="effect-toggle-wrap">
-                <input type="checkbox" id="fx-delay" class="effect-toggle" />
-                <label for="fx-delay" class="effect-name">Delay</label>
-              </div>
-              <input type="range" id="fx-delay-amt" min="0" max="100" value="30" class="effect-knob" />
+            <div class="effect-row">
+              <label class="effect-toggle-label">
+                <input type="checkbox" id="fx-delay" class="effect-check" />
+                <span class="effect-toggle-track"></span>
+              </label>
+              <span class="effect-name">Delay</span>
+              <input type="range" id="fx-delay-amt" min="0" max="100" value="30" class="effect-slider" />
               <span class="effect-val" id="fx-delay-val">30%</span>
             </div>
-            <div class="effect-strip">
-              <div class="effect-toggle-wrap">
-                <input type="checkbox" id="fx-dist" class="effect-toggle" />
-                <label for="fx-dist" class="effect-name">Distortion</label>
-              </div>
-              <input type="range" id="fx-dist-amt" min="0" max="100" value="10" class="effect-knob" />
+            <div class="effect-row">
+              <label class="effect-toggle-label">
+                <input type="checkbox" id="fx-dist" class="effect-check" />
+                <span class="effect-toggle-track"></span>
+              </label>
+              <span class="effect-name">Distortion</span>
+              <input type="range" id="fx-dist-amt" min="0" max="100" value="10" class="effect-slider" />
               <span class="effect-val" id="fx-dist-val">10%</span>
+            </div>
+            <div class="effect-row">
+              <label class="effect-toggle-label">
+                <input type="checkbox" id="fx-compressor" class="effect-check" />
+                <span class="effect-toggle-track"></span>
+              </label>
+              <span class="effect-name">Compressor</span>
+              <input type="range" id="fx-comp-amt" min="0" max="100" value="40" class="effect-slider" />
+              <span class="effect-val" id="fx-comp-val">40%</span>
             </div>
           </div>
         </div>
 
-        <!-- AI Melody Generator -->
-        <div class="panel melody-panel">
+        <!-- AI MELODY + ARPEGGIATOR -->
+        <div class="studio-panel ai-panel">
           <div class="panel-header">
-            <span class="panel-title">AI Melody</span>
+            <div class="panel-title-row">
+              <span class="panel-icon">🤖</span>
+              <span class="panel-title">AI Tools</span>
+            </div>
           </div>
-          <div class="melody-controls">
-            <div class="melody-info" id="melody-info">No melody loaded</div>
-            <button id="btn-gen-melody" class="btn-melody">✨ Generate Melody</button>
+          <div class="ai-tools-body">
+            <div class="ai-tool-row">
+              <div class="ai-tool-info">
+                <div class="ai-tool-name">Melody Generator</div>
+                <div class="ai-tool-desc" id="melody-info">Generate an 8-note phrase in your scale</div>
+              </div>
+              <button id="btn-gen-melody" class="btn btn-primary btn-sm-icon">✨</button>
+            </div>
+            <div class="ai-tool-row">
+              <div class="ai-tool-info">
+                <div class="ai-tool-name">Arpeggiator</div>
+                <div class="arp-controls">
+                  <select id="arp-mode" class="select-sm">
+                    <option value="off">Off</option>
+                    <option value="up">Up</option>
+                    <option value="down">Down</option>
+                    <option value="updown">Up/Down</option>
+                    <option value="random">Random</option>
+                  </select>
+                  <select id="arp-rate" class="select-sm">
+                    <option value="4">1/4</option>
+                    <option value="8" selected>1/8</option>
+                    <option value="16">1/16</option>
+                  </select>
+                </div>
+              </div>
+            </div>
           </div>
+        </div>
+
+        <!-- PROJECT SAVE/LOAD -->
+        <div class="studio-panel project-panel">
+          <div class="panel-header">
+            <div class="panel-title-row">
+              <span class="panel-icon">💾</span>
+              <span class="panel-title">Project</span>
+            </div>
+          </div>
+          <div class="project-actions">
+            <button id="btn-project-save" class="btn btn-secondary btn-xs">Save</button>
+            <button id="btn-project-load" class="btn btn-secondary btn-xs">Load</button>
+            <button id="btn-project-new" class="btn btn-ghost btn-xs">New</button>
+            <button id="btn-project-share" class="btn btn-ghost btn-xs">Share</button>
+          </div>
+          <div class="saved-projects" id="saved-projects"></div>
         </div>
 
       </div>
     </div>
 
-    <!-- Recording Status -->
+    <!-- RECORDING STATUS -->
     <div id="recording-bar" class="recording-bar hidden">
-      <div class="rec-dot"></div>
-      <span>Recording... <span id="rec-time">0:00</span></span>
-      <button id="btn-stop-record" class="btn-stop-rec">Stop & Export</button>
+      <div class="rec-indicator">
+        <div class="rec-dot"></div>
+        <span>REC</span>
+      </div>
+      <div class="rec-timer" id="rec-time">0:00</div>
+      <div class="rec-waveform" id="rec-waveform">
+        <span></span><span></span><span></span><span></span><span></span>
+        <span></span><span></span><span></span>
+      </div>
+      <button id="btn-stop-record" class="btn btn-danger btn-sm">Stop & Export</button>
     </div>
 
   </div><!-- /studio -->
 
   <script src="config.js" onerror="void 0"></script>
+  <script src="js/toast.js"></script>
   <script src="js/audio-engine.js"></script>
   <script src="js/sequencer.js"></script>
   <script src="js/keyboard.js"></script>
@@ -294,6 +499,9 @@
   <script src="js/effects.js"></script>
   <script src="js/visualizer.js"></script>
   <script src="js/ai-generator.js"></script>
+  <script src="js/arpeggiator.js"></script>
+  <script src="js/project.js"></script>
+  <script src="js/piano-roll.js"></script>
   <script src="js/presets.js"></script>
   <script src="js/studio.js"></script>
 </body>

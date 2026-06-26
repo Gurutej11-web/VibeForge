@@ -1,7 +1,7 @@
 // VibeForge Audio Engine — Web Audio API
 window.AudioEngine = (() => {
   let ctx = null;
-  let masterGain, analyser, reverbNode, delayNode, distNode, reverbGain, delayGain, distGain;
+  let masterGain, analyser, reverbNode, delayNode, distNode, reverbGain, delayGain, distGain, compressor;
   let mediaRecorder = null, recordedChunks = [], recordingStream = null;
   let destination;
 
@@ -40,12 +40,21 @@ window.AudioEngine = (() => {
     makeDistortion(0);
     distNode.connect(distGain);
 
-    // Chain: masterGain → reverb/delay/dist → analyser → output
-    masterGain.connect(analyser);
-    masterGain.connect(reverbNode);
+    // Compressor
+    compressor = ctx.createDynamicsCompressor();
+    compressor.threshold.value = -24;
+    compressor.knee.value = 30;
+    compressor.ratio.value = 4;
+    compressor.attack.value = 0.003;
+    compressor.release.value = 0.25;
+
+    // Chain: masterGain → compressor → reverb/delay/dist → analyser → output
+    masterGain.connect(compressor);
+    compressor.connect(analyser);
+    compressor.connect(reverbNode);
     reverbNode.connect(reverbGain);
-    masterGain.connect(delayNode);
-    masterGain.connect(distNode);
+    compressor.connect(delayNode);
+    compressor.connect(distNode);
     reverbGain.connect(analyser);
     delayGain.connect(analyser);
     distGain.connect(analyser);
@@ -259,6 +268,23 @@ window.AudioEngine = (() => {
   }
   function setMasterVolume(v) { if (masterGain) masterGain.gain.value = v; }
   function setDelayTime(bpm) { if (delayNode) delayNode.delayTime.value = 60 / bpm / 2; }
+  function setCompressor(enabled, amount) {
+    if (!compressor) return;
+    compressor.threshold.value = enabled ? -24 - amount * 20 : 0;
+    compressor.ratio.value = enabled ? 4 + amount * 12 : 1;
+  }
+
+  function playMetronome(isDownbeat, when = 0) {
+    resume();
+    const t = when || ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.frequency.value = isDownbeat ? 1800 : 1200;
+    gain.gain.setValueAtTime(isDownbeat ? 0.3 : 0.15, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.06);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(t); osc.stop(t + 0.06);
+  }
 
   // Recording
   function startRecording() {
@@ -288,6 +314,7 @@ window.AudioEngine = (() => {
     init, resume, playNote, playChord, playDrum, playBass,
     setReverbAmount, setDelayAmount, setDistAmount, setMasterVolume, setDelayTime,
     startRecording, stopRecording,
+    setCompressor, playMetronome,
     getAnalyser: () => analyser,
     getCtx: () => ctx
   };
