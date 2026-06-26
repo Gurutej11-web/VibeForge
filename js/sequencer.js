@@ -128,6 +128,17 @@ window.Sequencer = (() => {
     });
 
     onStepCallbacks.forEach(cb => cb(currentStep));
+
+    // BPM pulse on quarter notes
+    if (currentStep % 4 === 0) {
+      const bpmEl = document.getElementById('bpm-value');
+      if (bpmEl) {
+        bpmEl.classList.remove('beat-pulse');
+        void bpmEl.offsetWidth;
+        bpmEl.classList.add('beat-pulse');
+      }
+    }
+
     currentStep = (currentStep + 1) % steps;
   }
 

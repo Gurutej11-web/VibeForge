@@ -1052,3 +1052,66 @@ body::before {
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* BPM pulse on beat */
+.bpm-number.beat-pulse {
+  animation: bpm-beat 0.1s ease-out;
+}
+@keyframes bpm-beat {
+  0% { transform: scale(1.3); color: var(--accent-cyan); }
+  100% { transform: scale(1); color: var(--accent-purple); }
+}
+
+/* Sequencer playhead glow trail */
+.seq-cell.playhead::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 5px;
+  background: rgba(255,255,255,0.15);
+  pointer-events: none;
+}
+
+/* Drum pad flash colors by column */
+.drum-pad:nth-child(4n+1).hit { background: rgba(245,158,11,0.8) !important; box-shadow: 0 0 20px rgba(245,158,11,0.6); }
+.drum-pad:nth-child(4n+2).hit { background: rgba(249,115,22,0.8) !important; box-shadow: 0 0 20px rgba(249,115,22,0.6); }
+.drum-pad:nth-child(4n+3).hit { background: rgba(234,179,8,0.8) !important; box-shadow: 0 0 20px rgba(234,179,8,0.6); }
+.drum-pad:nth-child(4n+4).hit { background: rgba(132,204,22,0.8) !important; box-shadow: 0 0 20px rgba(132,204,22,0.6); }
+
+/* Chord pad ripple glow */
+.chord-pad.active {
+  box-shadow: 0 0 30px rgba(168,85,247,0.5), inset 0 0 20px rgba(168,85,247,0.1);
+}
+
+/* Panel glass shimmer on hover */
+.panel { transition: box-shadow 0.3s; }
+.panel:hover { box-shadow: 0 0 0 1px rgba(168,85,247,0.08); }
+
+/* Export button fill animation */
+.btn-export.exporting {
+  background: rgba(6,182,212,0.4);
+  animation: export-fill 0.8s ease forwards;
+}
+@keyframes export-fill {
+  from { background-size: 0% 100%; }
+  to { background-size: 100% 100%; }
+}
+
+/* Tooltip */
+[title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 5px;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 999;
+}
+.transport-btn, .viz-btn, .btn-icon-sm { position: relative; }
