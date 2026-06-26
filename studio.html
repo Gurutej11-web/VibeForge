@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VibeForge Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/studio.css" />
+</head>
+<body>
+  <!-- Background Visualizer -->
+  <canvas id="visualizer-canvas"></canvas>
+
+  <!-- AI Generation Modal -->
+  <div id="ai-modal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-logo"><span>⚡</span> VibeForge</div>
+        <h2>Generate Your Track</h2>
+        <p>Describe what you want and AI will build your starting point</p>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Describe your vibe</label>
+          <textarea id="ai-description" placeholder="e.g. Late night city drive with warm chords and minimal beats..."></textarea>
+        </div>
+        <div class="form-group" id="api-key-group">
+          <label>Groq API Key</label>
+          <input type="password" id="ai-api-key" placeholder="gsk_..." autocomplete="off" />
+          <span style="font-size:0.72rem;color:var(--text-muted)">Saved locally in your browser • <a href="https://console.groq.com" target="_blank" style="color:var(--accent-cyan)">Get a free key</a></span>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Mood</label>
+            <select id="ai-mood">
+              <option value="happy">😊 Happy</option>
+              <option value="melancholic" selected>😢 Melancholic</option>
+              <option value="tense">😤 Tense</option>
+              <option value="euphoric">🤩 Euphoric</option>
+              <option value="dreamy">💫 Dreamy</option>
+              <option value="aggressive">🔥 Aggressive</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Genre</label>
+            <select id="ai-genre">
+              <option value="lo-fi" selected>Lo-Fi</option>
+              <option value="electronic">Electronic</option>
+              <option value="jazz">Jazz</option>
+              <option value="pop">Pop</option>
+              <option value="cinematic">Cinematic</option>
+              <option value="hip-hop">Hip-Hop</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>BPM</label>
+            <div class="bpm-input-wrap">
+              <input type="number" id="ai-bpm" value="85" min="60" max="180" />
+              <span class="bpm-label">BPM</span>
+            </div>
+          </div>
+        </div>
+        <button id="ai-generate-btn" class="btn-generate">
+          <span class="btn-generate-icon">✨</span>
+          Generate Track
+        </button>
+        <div id="ai-result" class="ai-result hidden">
+          <div class="ai-direction"></div>
+          <div class="ai-details">
+            <span class="ai-chip" id="ai-scale-chip"></span>
+            <span class="ai-chip" id="ai-chords-chip"></span>
+          </div>
+        </div>
+        <div id="ai-loading" class="ai-loading hidden">
+          <div class="spinner"></div>
+          <span>Groq is composing your track...</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="modal-skip" class="btn-skip">Skip — Open Blank Studio</button>
+        <button id="modal-load" class="btn-load-track hidden">Load Into Studio →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Studio UI -->
+  <div id="studio" class="studio hidden">
+
+    <!-- Transport Bar -->
+    <header class="transport-bar">
+      <div class="transport-left">
+        <a href="index.html" class="back-link">
+          <span>⚡</span> VibeForge
+        </a>
+      </div>
+      <div class="transport-center">
+        <button id="btn-play" class="transport-btn play-btn" title="Play (Space)">▶</button>
+        <button id="btn-stop" class="transport-btn" title="Stop">■</button>
+        <button id="btn-record" class="transport-btn record-btn" title="Record">⏺</button>
+        <div class="bpm-control">
+          <button class="bpm-adj" id="bpm-down">−</button>
+          <div class="bpm-display">
+            <span id="bpm-value" class="bpm-number">85</span>
+            <span class="bpm-unit">BPM</span>
+          </div>
+          <button class="bpm-adj" id="bpm-up">+</button>
+        </div>
+        <div class="time-sig">4/4</div>
+        <div class="step-indicator">
+          <span id="current-step-display">Step <span id="step-num">1</span></span>
+        </div>
+      </div>
+      <div class="transport-right">
+        <div class="viz-mode-btns">
+          <button class="viz-btn active" data-mode="particles" title="Particle Field">✦</button>
+          <button class="viz-btn" data-mode="waveform" title="Waveform">〜</button>
+          <button class="viz-btn" data-mode="bars" title="Frequency Bars">▌▌▌</button>
+        </div>
+        <button id="btn-ai-regen" class="btn-icon-sm" title="AI Generate">🤖</button>
+        <button id="btn-export" class="btn-export" title="Export WAV">⬇ Export</button>
+      </div>
+    </header>
+
+    <!-- AI Direction Bar -->
+    <div id="direction-bar" class="direction-bar hidden">
+      <span class="direction-label">🤖 AI Direction:</span>
+      <span id="direction-text"></span>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="studio-main">
+
+      <!-- Left: Chord Pads + Keyboard + Sequencer -->
+      <div class="studio-left">
+
+        <!-- Chord Pads -->
+        <div class="panel chord-panel">
+          <div class="panel-header">
+            <span class="panel-title">Chord Pads</span>
+            <span class="panel-hint">Click to play • Hold to sustain</span>
+          </div>
+          <div class="chord-pads" id="chord-pads">
+            <!-- Generated by JS -->
+          </div>
+        </div>
+
+        <!-- Step Sequencer -->
+        <div class="panel sequencer-panel">
+          <div class="panel-header">
+            <span class="panel-title">Step Sequencer</span>
+            <div class="seq-controls">
+              <button id="btn-add-row" class="btn-sm">+ Row</button>
+              <select id="seq-steps" class="select-sm">
+                <option value="16" selected>16 Steps</option>
+                <option value="32">32 Steps</option>
+              </select>
+            </div>
+          </div>
+          <div class="sequencer" id="sequencer">
+            <!-- Rows generated by JS -->
+          </div>
+        </div>
+
+        <!-- Playable Keyboard -->
+        <div class="panel keyboard-panel">
+          <div class="panel-header">
+            <span class="panel-title">Keyboard</span>
+            <div class="keyboard-controls">
+              <button class="kb-oct-btn" id="oct-down">Oct −</button>
+              <span id="octave-display" class="kb-oct-val">Oct 4</span>
+              <button class="kb-oct-btn" id="oct-up">Oct +</button>
+              <label class="record-toggle">
+                <input type="checkbox" id="kb-record-mode" />
+                <span>Record</span>
+              </label>
+            </div>
+          </div>
+          <div class="keyboard-wrap">
+            <div class="keyboard" id="keyboard">
+              <!-- Keys generated by JS -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Right: Mixer + Effects -->
+      <div class="studio-right">
+
+        <!-- Drum Machine -->
+        <div class="panel drum-panel">
+          <div class="panel-header">
+            <span class="panel-title">Drum Machine</span>
+            <select id="drum-kit" class="select-sm">
+              <option value="acoustic">Acoustic Kit</option>
+              <option value="electronic" selected>Electronic Kit</option>
+              <option value="lofi">Lo-Fi Kit</option>
+              <option value="trap">Trap Kit</option>
+            </select>
+          </div>
+          <div class="drum-pads" id="drum-pads">
+            <!-- 16 pads by JS -->
+          </div>
+        </div>
+
+        <!-- Mixer -->
+        <div class="panel mixer-panel">
+          <div class="panel-header">
+            <span class="panel-title">Mixer</span>
+          </div>
+          <div class="mixer" id="mixer">
+            <!-- Channel strips by JS -->
+          </div>
+          <div class="master-strip">
+            <div class="master-label">MASTER</div>
+            <div class="master-controls">
+              <div class="master-knob-group">
+                <label>Vol</label>
+                <input type="range" id="master-vol" min="0" max="100" value="80" class="master-fader" />
+              </div>
+              <div class="master-knob-group">
+                <label>Rev</label>
+                <input type="range" id="master-reverb" min="0" max="100" value="20" class="master-fader" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Effects Rack -->
+        <div class="panel effects-panel">
+          <div class="panel-header">
+            <span class="panel-title">Effects Rack</span>
+          </div>
+          <div class="effects-rack">
+            <div class="effect-strip">
+              <div class="effect-toggle-wrap">
+                <input type="checkbox" id="fx-reverb" class="effect-toggle" checked />
+                <label for="fx-reverb" class="effect-name">Reverb</label>
+              </div>
+              <input type="range" id="fx-reverb-amt" min="0" max="100" value="20" class="effect-knob" />
+              <span class="effect-val" id="fx-reverb-val">20%</span>
+            </div>
+            <div class="effect-strip">
+              <div class="effect-toggle-wrap">
+                <input type="checkbox" id="fx-delay" class="effect-toggle" />
+                <label for="fx-delay" class="effect-name">Delay</label>
+              </div>
+              <input type="range" id="fx-delay-amt" min="0" max="100" value="30" class="effect-knob" />
+              <span class="effect-val" id="fx-delay-val">30%</span>
+            </div>
+            <div class="effect-strip">
+              <div class="effect-toggle-wrap">
+                <input type="checkbox" id="fx-dist" class="effect-toggle" />
+                <label for="fx-dist" class="effect-name">Distortion</label>
+              </div>
+              <input type="range" id="fx-dist-amt" min="0" max="100" value="10" class="effect-knob" />
+              <span class="effect-val" id="fx-dist-val">10%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- AI Melody Generator -->
+        <div class="panel melody-panel">
+          <div class="panel-header">
+            <span class="panel-title">AI Melody</span>
+          </div>
+          <div class="melody-controls">
+            <div class="melody-info" id="melody-info">No melody loaded</div>
+            <button id="btn-gen-melody" class="btn-melody">✨ Generate Melody</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Recording Status -->
+    <div id="recording-bar" class="recording-bar hidden">
+      <div class="rec-dot"></div>
+      <span>Recording... <span id="rec-time">0:00</span></span>
+      <button id="btn-stop-record" class="btn-stop-rec">Stop & Export</button>
+    </div>
+
+  </div><!-- /studio -->
+
+  <script src="config.js" onerror="void 0"></script>
+  <script src="js/audio-engine.js"></script>
+  <script src="js/sequencer.js"></script>
+  <script src="js/keyboard.js"></script>
+  <script src="js/drum-machine.js"></script>
+  <script src="js/chord-pads.js"></script>
+  <script src="js/mixer.js"></script>
+  <script src="js/effects.js"></script>
+  <script src="js/visualizer.js"></script>
+  <script src="js/ai-generator.js"></script>
+  <script src="js/presets.js"></script>
+  <script src="js/studio.js"></script>
+</body>
+</html>

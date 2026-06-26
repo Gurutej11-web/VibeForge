@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VibeForge — AI-Powered Music Creation Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/landing.css" />
+</head>
+<body>
+  <canvas id="bg-canvas"></canvas>
+
+  <nav class="navbar">
+    <div class="nav-logo">
+      <span class="logo-icon">⚡</span>
+      <span class="logo-text">VibeForge</span>
+    </div>
+    <div class="nav-links">
+      <a href="gallery.html">Gallery</a>
+      <a href="studio.html" class="btn-nav">Open Studio</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-badge">Powered by Groq AI</div>
+    <h1 class="hero-title">
+      Make Music.<br/>
+      <span class="gradient-text">No Experience Needed.</span>
+    </h1>
+    <p class="hero-subtitle">
+      Describe your mood, pick a genre, and let AI generate your starting track.
+      Then layer, remix, and export a real production — right in the browser.
+    </p>
+    <div class="hero-cta">
+      <a href="studio.html?autoGenerate=true" class="btn-primary pulse-btn">
+        <span class="btn-icon">🎵</span>
+        Generate Your First Beat
+      </a>
+      <a href="studio.html" class="btn-secondary">Open Studio</a>
+    </div>
+    <div class="hero-tags">
+      <span class="tag">Step Sequencer</span>
+      <span class="tag">Chord Pads</span>
+      <span class="tag">Drum Machine</span>
+      <span class="tag">AI Melody</span>
+      <span class="tag">Real-time Visualizer</span>
+      <span class="tag">Export WAV</span>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="feature-card" data-delay="0">
+      <div class="feature-icon">🤖</div>
+      <h3>AI Track Starter</h3>
+      <p>Describe your mood and genre. Groq generates a full chord progression, bassline, and creative direction — your blank canvas becomes a song in seconds.</p>
+    </div>
+    <div class="feature-card" data-delay="100">
+      <div class="feature-icon">🎛️</div>
+      <h3>Full Production Suite</h3>
+      <p>Step sequencer, playable keyboard, drum machine, chord pads, and a professional mixer — every tool a real producer needs, simplified for everyone.</p>
+    </div>
+    <div class="feature-card" data-delay="200">
+      <div class="feature-icon">✨</div>
+      <h3>Living Visualizer</h3>
+      <p>Your music breathes in real time. Particles pulse to the kick drum, waveforms ripple to your melody — three stunning visual modes that shift with your mood.</p>
+    </div>
+  </section>
+
+  <section class="presets-preview">
+    <h2>Start from a Preset</h2>
+    <p class="section-sub">Six hand-crafted tracks, each fully editable in the studio</p>
+    <div class="preset-pills">
+      <a href="studio.html?preset=lofi" class="preset-pill amber">🌙 Lo-Fi Beat</a>
+      <a href="studio.html?preset=cinematic" class="preset-pill violet">🎬 Cinematic Swell</a>
+      <a href="studio.html?preset=trap" class="preset-pill red">🔥 Trap Pattern</a>
+      <a href="studio.html?preset=jazz" class="preset-pill indigo">🎷 Jazz Progression</a>
+      <a href="studio.html?preset=dreamy" class="preset-pill cyan">💫 Dreamy Ambient</a>
+      <a href="studio.html?preset=edm" class="preset-pill purple">⚡ Electronic Dance</a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-logo">
+      <span class="logo-icon">⚡</span>
+      <span class="logo-text">VibeForge</span>
+    </div>
+    <p>Built with Web Audio API + Groq</p>
+    <div class="footer-links">
+      <a href="studio.html">Studio</a>
+      <a href="gallery.html">Gallery</a>
+    </div>
+  </footer>
+
+  <script src="js/landing.js"></script>
+</body>
+</html>
