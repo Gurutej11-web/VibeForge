@@ -5,22 +5,47 @@ window.AIGenerator = (() => {
   function getKey() { return localStorage.getItem('vibeforge_groq_key') || ''; }
 
   async function groqCall(prompt, maxTokens = 600) {
-    const key = getKey();
-    if (!key) throw new Error('No Groq API key. Enter it in the Generate panel.');
-    const res = await fetch(GROQ_URL, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.75, max_tokens: maxTokens
-      })
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err?.error?.message || `HTTP ${res.status}`);
+    let data;
+
+    // Try server-side proxy first (Vercel env key — no client key needed)
+    try {
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, maxTokens })
+      });
+      if (res.ok) {
+        data = await res.json();
+      } else if (res.status !== 404) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error || `Server error ${res.status}`);
+      }
+      // 404 = running locally without serverless, fall through to direct call
+    } catch (e) {
+      if (!e.message.includes('fetch') && !e.message.includes('Failed')) throw e;
+      // Network error on proxy — fall through to direct call
     }
-    const data = await res.json();
+
+    // Fallback: direct Groq call using user's own key
+    if (!data) {
+      const key = getKey();
+      if (!key) throw new Error('No API key available. Add GROQ_API_KEY to Vercel or enter your key in the field.');
+      const res = await fetch(GROQ_URL, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.75, max_tokens: maxTokens
+        })
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error?.message || `HTTP ${res.status}`);
+      }
+      data = await res.json();
+    }
+
     const text = data.choices[0].message.content.trim();
     const match = text.match(/\{[\s\S]*\}/);
     if (!match) throw new Error('No JSON in response');
