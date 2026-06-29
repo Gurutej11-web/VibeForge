@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VibeForge — AI-Powered Music Creation Studio</title>
-  <meta name="description" content="Make music with AI. No experience needed. Generate beats, layer sounds, and export real tracks — all in the browser." />
+  <title>VibeForge — AI Music Studio in Your Browser</title>
+  <meta name="description" content="Create real music with AI. Step sequencer, drum machine, playable keyboard, chord pads, live visualizer, WAV export — all free, all in your browser. Powered by Groq." />
+  <meta property="og:title" content="VibeForge — AI Music Studio" />
+  <meta property="og:description" content="Generate beats, layer sounds, and export real audio — no installs, no account, no experience needed." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
@@ -12,440 +14,514 @@
   <link rel="stylesheet" href="css/landing.css" />
 </head>
 <body>
-  <!-- Cursor -->
   <div class="cursor-dot" id="cursor-dot"></div>
   <div class="cursor-ring" id="cursor-ring"></div>
-
-  <!-- Toast -->
   <div id="toast-container"></div>
-
-  <!-- Background -->
   <canvas id="bg-canvas"></canvas>
   <div class="bg-gradient-overlay"></div>
 
-  <!-- Navbar -->
+  <!-- NAVBAR -->
   <nav class="navbar" id="navbar">
     <a href="index.html" class="nav-logo">
       <div class="logo-mark">⚡</div>
       <span class="logo-text">VibeForge</span>
-      <span class="logo-badge">BETA</span>
+      <span class="logo-badge">FREE</span>
     </a>
     <div class="nav-center">
       <a href="#features" class="nav-link">Features</a>
       <a href="#how-it-works" class="nav-link">How It Works</a>
-      <a href="gallery.html" class="nav-link">Gallery</a>
+      <a href="#presets" class="nav-link">Presets</a>
     </div>
     <div class="nav-right">
       <a href="studio.html" class="btn btn-ghost nav-studio-link">Open Studio</a>
-      <a href="studio.html?autoGenerate=true" class="btn btn-primary">
-        <span>Generate Beat</span>
-        <span class="btn-arrow">→</span>
+      <a href="studio.html?start=pick" class="btn btn-primary">
+        Start Making Music <span class="btn-arrow">→</span>
       </a>
     </div>
     <button class="nav-mobile-toggle" id="nav-mobile-toggle">☰</button>
   </nav>
 
-  <!-- Mobile menu -->
   <div class="mobile-menu" id="mobile-menu">
     <a href="#features">Features</a>
     <a href="#how-it-works">How It Works</a>
-    <a href="gallery.html">Gallery</a>
+    <a href="#presets">Presets</a>
     <a href="studio.html">Open Studio</a>
-    <a href="studio.html?autoGenerate=true" class="btn btn-primary w-full">Generate Your First Beat</a>
+    <a href="studio.html?start=pick" class="btn btn-primary w-full">Start Making Music</a>
   </div>
 
-  <!-- HERO -->
+  <!-- ===== HERO ===== -->
   <section class="hero" id="hero">
     <div class="hero-content">
       <div class="hero-eyebrow">
-        <span class="badge badge-purple">✦ Powered by Groq AI</span>
-        <span class="hero-divider">·</span>
-        <span class="hero-stat-pill">⚡ Instant Generation</span>
+        <span class="badge badge-purple">✦ Powered by Groq AI · Free Forever</span>
       </div>
 
       <h1 class="hero-title">
-        Make Music.<br/>
-        <span class="gradient-text typing-text" id="typing-text">No Experience Needed.</span>
+        Make Real Music.<br/>
+        <span class="gradient-text" id="typing-text">No Experience Needed.</span>
       </h1>
 
       <p class="hero-subtitle">
-        Describe a mood. Pick a genre. Let AI compose your starting track.<br/>
-        Then layer sounds, build beats, and export a real song — all in the browser.
+        Type a mood. Pick a genre. Groq AI builds your track — chords, drums, bassline, melody —
+        then you play, tweak, and export a real audio file. All in the browser. Zero installs.
       </p>
 
       <div class="hero-actions">
-        <a href="studio.html?autoGenerate=true" class="btn btn-primary btn-hero">
+        <a href="studio.html?start=pick" class="btn btn-primary btn-hero">
           <span class="btn-glow"></span>
-          <span class="btn-icon">🎵</span>
-          Generate Your First Beat
+          🎵 Start Making Music
           <span class="btn-arrow">→</span>
         </a>
         <button class="btn btn-secondary btn-hero" id="hero-play-demo">
-          <span>▶</span> Hear Demo
+          <span id="demo-icon">▶</span>
+          <span id="demo-label">Hear Live Demo</span>
         </button>
       </div>
 
-      <div class="hero-tags">
-        <span class="hero-tag">🎛️ Step Sequencer</span>
-        <span class="hero-tag">🎹 Playable Keyboard</span>
-        <span class="hero-tag">🥁 Drum Machine</span>
-        <span class="hero-tag">🎼 Chord Pads</span>
-        <span class="hero-tag">🌀 Live Visualizer</span>
-        <span class="hero-tag">⬇️ WAV Export</span>
-        <span class="hero-tag">🤖 AI Melody</span>
-        <span class="hero-tag">🎚️ Mixer</span>
+      <div class="hero-proof">
+        <span class="proof-item">✓ No account needed</span>
+        <span class="proof-dot">·</span>
+        <span class="proof-item">✓ No installs</span>
+        <span class="proof-dot">·</span>
+        <span class="proof-item">✓ Export real audio</span>
+        <span class="proof-dot">·</span>
+        <span class="proof-item">✓ Professionals welcome</span>
       </div>
     </div>
 
-    <!-- Studio Preview Mockup -->
+    <!-- ANIMATED STUDIO MOCKUP -->
     <div class="hero-preview" id="hero-preview">
       <div class="preview-frame">
         <div class="preview-bar">
-          <div class="preview-dots">
-            <span></span><span></span><span></span>
-          </div>
-          <span class="preview-url">vibeforge.app/studio</span>
+          <div class="preview-dots"><span></span><span></span><span></span></div>
+          <span class="preview-url">vibe-forge-pi.vercel.app/studio</span>
+          <span class="preview-live-badge">● LIVE</span>
         </div>
         <div class="preview-studio">
-          <!-- Mini transport -->
+          <!-- Transport -->
           <div class="mock-transport">
-            <div class="mock-play-btn">▶</div>
+            <div class="mock-play-btn playing">⏸</div>
             <div class="mock-bpm">
-              <span class="mock-bpm-num">85</span>
+              <span class="mock-bpm-num" id="mock-bpm-num">85</span>
               <span class="mock-bpm-unit">BPM</span>
             </div>
-            <div class="mock-steps">
-              <div class="mock-step active"></div>
-              <div class="mock-step"></div>
-              <div class="mock-step active"></div>
-              <div class="mock-step"></div>
-              <div class="mock-step active" id="mock-current"></div>
-              <div class="mock-step active"></div>
-              <div class="mock-step"></div>
-              <div class="mock-step active"></div>
+            <div class="mock-labels">
+              <span class="mock-label-badge" style="--c:#A855F7">Lo-Fi</span>
+              <span class="mock-label-badge" style="--c:#06B6D4">Melancholic</span>
             </div>
           </div>
-          <!-- Mini sequencer -->
-          <div class="mock-seq">
-            <div class="mock-row" data-label="KICK">
-              <div class="mock-cells">
-                <div class="mc on amber"></div><div class="mc"></div><div class="mc"></div><div class="mc"></div>
-                <div class="mc on amber"></div><div class="mc"></div><div class="mc"></div><div class="mc"></div>
+
+          <!-- Animated Sequencer -->
+          <div class="mock-seq" id="mock-seq">
+            <div class="mock-row">
+              <span class="mock-row-label">KICK</span>
+              <div class="mock-cells" id="mock-kick">
+                <div class="mc on amber" data-beat="0"></div><div class="mc" data-beat="1"></div><div class="mc" data-beat="2"></div><div class="mc" data-beat="3"></div>
+                <div class="mc on amber" data-beat="4"></div><div class="mc" data-beat="5"></div><div class="mc" data-beat="6"></div><div class="mc" data-beat="7"></div>
+                <div class="mc on amber" data-beat="8"></div><div class="mc" data-beat="9"></div><div class="mc" data-beat="10"></div><div class="mc" data-beat="11"></div>
+                <div class="mc on amber" data-beat="12"></div><div class="mc" data-beat="13"></div><div class="mc" data-beat="14"></div><div class="mc" data-beat="15"></div>
               </div>
             </div>
-            <div class="mock-row" data-label="SNARE">
-              <div class="mock-cells">
-                <div class="mc"></div><div class="mc"></div><div class="mc"></div><div class="mc on orange"></div>
-                <div class="mc"></div><div class="mc"></div><div class="mc"></div><div class="mc on orange"></div>
+            <div class="mock-row">
+              <span class="mock-row-label">SNARE</span>
+              <div class="mock-cells" id="mock-snare">
+                <div class="mc" data-beat="0"></div><div class="mc" data-beat="1"></div><div class="mc" data-beat="2"></div><div class="mc" data-beat="3"></div>
+                <div class="mc on orange" data-beat="4"></div><div class="mc" data-beat="5"></div><div class="mc" data-beat="6"></div><div class="mc" data-beat="7"></div>
+                <div class="mc" data-beat="8"></div><div class="mc" data-beat="9"></div><div class="mc" data-beat="10"></div><div class="mc" data-beat="11"></div>
+                <div class="mc on orange" data-beat="12"></div><div class="mc" data-beat="13"></div><div class="mc" data-beat="14"></div><div class="mc" data-beat="15"></div>
               </div>
             </div>
-            <div class="mock-row" data-label="HI-HAT">
-              <div class="mock-cells">
-                <div class="mc on yellow"></div><div class="mc on yellow"></div><div class="mc on yellow"></div><div class="mc on yellow"></div>
-                <div class="mc on yellow"></div><div class="mc on yellow"></div><div class="mc on yellow"></div><div class="mc on yellow"></div>
+            <div class="mock-row">
+              <span class="mock-row-label">HI-HAT</span>
+              <div class="mock-cells" id="mock-hihat">
+                <div class="mc on yellow" data-beat="0"></div><div class="mc on yellow" data-beat="1"></div>
+                <div class="mc on yellow" data-beat="2"></div><div class="mc on yellow" data-beat="3"></div>
+                <div class="mc on yellow" data-beat="4"></div><div class="mc on yellow" data-beat="5"></div>
+                <div class="mc on yellow" data-beat="6"></div><div class="mc on yellow" data-beat="7"></div>
+                <div class="mc on yellow" data-beat="8"></div><div class="mc on yellow" data-beat="9"></div>
+                <div class="mc on yellow" data-beat="10"></div><div class="mc on yellow" data-beat="11"></div>
+                <div class="mc on yellow" data-beat="12"></div><div class="mc on yellow" data-beat="13"></div>
+                <div class="mc on yellow" data-beat="14"></div><div class="mc on yellow" data-beat="15"></div>
               </div>
             </div>
-            <div class="mock-row" data-label="BASS">
-              <div class="mock-cells">
-                <div class="mc on violet"></div><div class="mc"></div><div class="mc"></div><div class="mc on violet"></div>
-                <div class="mc"></div><div class="mc"></div><div class="mc on violet"></div><div class="mc"></div>
+            <div class="mock-row">
+              <span class="mock-row-label">BASS</span>
+              <div class="mock-cells" id="mock-bass">
+                <div class="mc on violet" data-beat="0"></div><div class="mc" data-beat="1"></div><div class="mc" data-beat="2"></div><div class="mc" data-beat="3"></div>
+                <div class="mc" data-beat="4"></div><div class="mc" data-beat="5"></div><div class="mc on violet" data-beat="6"></div><div class="mc" data-beat="7"></div>
+                <div class="mc" data-beat="8"></div><div class="mc on violet" data-beat="9"></div><div class="mc" data-beat="10"></div><div class="mc" data-beat="11"></div>
+                <div class="mc" data-beat="12"></div><div class="mc" data-beat="13"></div><div class="mc on violet" data-beat="14"></div><div class="mc" data-beat="15"></div>
               </div>
             </div>
           </div>
-          <!-- Mini chord pads -->
+
+          <!-- Chord Pads Row -->
           <div class="mock-chords">
-            <div class="mock-chord active-chord">Cm</div>
-            <div class="mock-chord">Fm</div>
-            <div class="mock-chord">Gm</div>
-            <div class="mock-chord">B♭</div>
+            <div class="mock-chord" id="mock-chord-0">Cm</div>
+            <div class="mock-chord" id="mock-chord-1">Fm</div>
+            <div class="mock-chord" id="mock-chord-2">Gm</div>
+            <div class="mock-chord" id="mock-chord-3">B♭</div>
           </div>
-          <!-- Mini visualizer bar -->
-          <div class="mock-viz">
-            <div class="mock-viz-bar" style="height:60%"></div>
-            <div class="mock-viz-bar" style="height:80%"></div>
-            <div class="mock-viz-bar" style="height:40%"></div>
-            <div class="mock-viz-bar" style="height:90%"></div>
-            <div class="mock-viz-bar" style="height:55%"></div>
-            <div class="mock-viz-bar" style="height:70%"></div>
-            <div class="mock-viz-bar" style="height:30%"></div>
-            <div class="mock-viz-bar" style="height:85%"></div>
-            <div class="mock-viz-bar" style="height:50%"></div>
-            <div class="mock-viz-bar" style="height:65%"></div>
-            <div class="mock-viz-bar" style="height:45%"></div>
-            <div class="mock-viz-bar" style="height:75%"></div>
+
+          <!-- Animated Visualizer Bars -->
+          <div class="mock-viz" id="mock-viz">
+            <div class="mock-viz-bar"></div><div class="mock-viz-bar"></div>
+            <div class="mock-viz-bar"></div><div class="mock-viz-bar"></div>
+            <div class="mock-viz-bar"></div><div class="mock-viz-bar"></div>
+            <div class="mock-viz-bar"></div><div class="mock-viz-bar"></div>
+            <div class="mock-viz-bar"></div><div class="mock-viz-bar"></div>
+            <div class="mock-viz-bar"></div><div class="mock-viz-bar"></div>
+            <div class="mock-viz-bar"></div><div class="mock-viz-bar"></div>
+            <div class="mock-viz-bar"></div><div class="mock-viz-bar"></div>
           </div>
         </div>
       </div>
-      <!-- Floating badges -->
-      <div class="float-badge float-1">
-        <span>🤖</span> AI Generated
-      </div>
-      <div class="float-badge float-2">
-        <span>🎵</span> Lo-Fi · 85 BPM
-      </div>
+
+      <div class="float-badge float-1">🤖 AI Generated in 0.8s</div>
+      <div class="float-badge float-2">🎵 Lo-Fi · 75 BPM · C minor</div>
       <div class="float-badge float-3">
-        <div class="float-eq">
-          <span></span><span></span><span></span><span></span>
-        </div>
-        Playing...
+        <div class="float-eq"><span></span><span></span><span></span><span></span></div>
+        Live Playback
       </div>
     </div>
 
-    <!-- Scroll indicator -->
     <div class="scroll-indicator">
-      <div class="scroll-mouse">
-        <div class="scroll-wheel"></div>
-      </div>
-      <span>Scroll to explore</span>
+      <div class="scroll-mouse"><div class="scroll-wheel"></div></div>
+      <span>See all features</span>
     </div>
   </section>
 
   <!-- STATS BAR -->
   <div class="stats-bar">
-    <div class="stat-item">
-      <span class="stat-num">∞</span>
-      <span class="stat-label">Beats Possible</span>
-    </div>
+    <div class="stat-item"><span class="stat-num">16</span><span class="stat-label">Synth Instruments</span></div>
     <div class="stat-divider"></div>
-    <div class="stat-item">
-      <span class="stat-num">6</span>
-      <span class="stat-label">Genre Styles</span>
-    </div>
+    <div class="stat-item"><span class="stat-num">6</span><span class="stat-label">AI Genres</span></div>
     <div class="stat-divider"></div>
-    <div class="stat-item">
-      <span class="stat-num">0</span>
-      <span class="stat-label">Installs Needed</span>
-    </div>
+    <div class="stat-item"><span class="stat-num">6</span><span class="stat-label">Ready Presets</span></div>
     <div class="stat-divider"></div>
-    <div class="stat-item">
-      <span class="stat-num">60fps</span>
-      <span class="stat-label">Live Visualizer</span>
-    </div>
+    <div class="stat-item"><span class="stat-num">3</span><span class="stat-label">Visualizer Modes</span></div>
     <div class="stat-divider"></div>
-    <div class="stat-item">
-      <span class="stat-num">WAV</span>
-      <span class="stat-label">Export Quality</span>
-    </div>
+    <div class="stat-item"><span class="stat-num">WAV</span><span class="stat-label">Export Quality</span></div>
+    <div class="stat-divider"></div>
+    <div class="stat-item"><span class="stat-num">0</span><span class="stat-label">Installs Needed</span></div>
   </div>
 
-  <!-- FEATURES -->
+  <!-- ===== QUICK START ===== -->
+  <section class="quickstart-section" id="how-it-works">
+    <div class="section-header">
+      <span class="badge badge-green">Get Going in 60 Seconds</span>
+      <h2 class="section-title">Three Ways to <span class="gradient-text">Start Creating</span></h2>
+      <p class="section-sub">Pick whatever feels right — you can switch between all three anytime inside the studio.</p>
+    </div>
+    <div class="quickstart-cards">
+      <a href="studio.html?start=ai" class="quickstart-card qs-ai" data-animate>
+        <div class="qs-num">01</div>
+        <div class="qs-icon">🤖</div>
+        <h3>Let AI Build It</h3>
+        <p>Type a mood or vibe. Groq AI composes your chord progression, drum pattern, bassline, and gives you a creative direction — in under a second.</p>
+        <div class="qs-tags">
+          <span>Chord Progressions</span>
+          <span>Drum Patterns</span>
+          <span>Creative Direction</span>
+        </div>
+        <div class="qs-cta">Generate with AI →</div>
+      </a>
+      <a href="studio.html?start=pick" class="quickstart-card qs-preset" data-animate>
+        <div class="qs-num">02</div>
+        <div class="qs-icon">🎛️</div>
+        <h3>Start from a Preset</h3>
+        <p>Pick one of 6 hand-crafted starting tracks — Lo-Fi, Trap, Jazz, Cinematic, Dreamy, or EDM. Every pattern is fully editable from the moment you load it.</p>
+        <div class="qs-tags">
+          <span>Lo-Fi · 75 BPM</span>
+          <span>Trap · 140 BPM</span>
+          <span>Jazz · 120 BPM</span>
+        </div>
+        <div class="qs-cta">Browse Presets →</div>
+      </a>
+      <a href="studio.html" class="quickstart-card qs-blank" data-animate>
+        <div class="qs-num">03</div>
+        <div class="qs-icon">🎹</div>
+        <h3>Build from Scratch</h3>
+        <p>Open a blank canvas. Draw patterns on the step sequencer, play the keyboard live, hit drum pads — full control from the first beat.</p>
+        <div class="qs-tags">
+          <span>Step Sequencer</span>
+          <span>Live Keyboard</span>
+          <span>Drum Pads</span>
+        </div>
+        <div class="qs-cta">Open Blank Studio →</div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ===== FEATURES ===== -->
   <section class="features-section" id="features">
     <div class="section-header">
-      <span class="badge badge-cyan">Everything You Need</span>
-      <h2 class="section-title">A Full Studio. <span class="gradient-text">In Your Browser.</span></h2>
-      <p class="section-sub">Every tool a real producer uses — designed so anyone can make music from day one.</p>
+      <span class="badge badge-cyan">Full Production Suite</span>
+      <h2 class="section-title">Everything a Producer Needs. <span class="gradient-text">In the Browser.</span></h2>
+      <p class="section-sub">From first-time hobbyists to professional musicians — every tool is here and ready.</p>
     </div>
 
     <div class="features-grid">
+
+      <!-- BIG CARD: AI -->
       <div class="feature-card feature-large" data-animate>
         <div class="feature-card-bg" style="--c:#A855F7"></div>
-        <div class="feature-icon-wrap">
-          <div class="feature-icon">🤖</div>
-        </div>
-        <h3>AI Track Starter</h3>
-        <p>Describe your vibe in plain English. Groq generates a chord progression, bassline pattern, suggested scale, and a creative direction — your blank canvas becomes a real song in seconds.</p>
+        <div class="feature-icon-wrap"><div class="feature-icon">🤖</div></div>
+        <div class="feature-badge">Most Popular</div>
+        <h3>AI Track Generator</h3>
+        <p>Describe your vibe in plain English — "melancholic lo-fi, late night city drive" — and Groq generates a complete musical foundation in under a second. Scale, chord progression, drum pattern, bassline, and creative direction all land together.</p>
         <div class="feature-tags">
           <span>Chord Progressions</span>
-          <span>Bassline Patterns</span>
-          <span>Scale Selection</span>
+          <span>Drum Patterns</span>
+          <span>AI Melody Writer</span>
           <span>Creative Direction</span>
+          <span>Scale Selection</span>
+        </div>
+        <div class="feature-action">
+          <a href="studio.html?start=ai" class="btn btn-primary btn-sm-text">Try AI Generator →</a>
         </div>
       </div>
 
       <div class="feature-card" data-animate>
         <div class="feature-card-bg" style="--c:#F59E0B"></div>
         <div class="feature-icon">🎛️</div>
-        <h3>Step Sequencer</h3>
-        <p>16-step grid with color-coded rows for drums, bass, and melody. Add rows, mute channels, and watch the glowing playhead sweep in perfect time.</p>
+        <h3>16-Step Sequencer</h3>
+        <p>Color-coded rows for kick, snare, hi-hat, bass, lead, and melody. Click to toggle steps, drag to paint patterns, mute rows instantly. A glowing playhead sweeps in perfect time.</p>
+        <ul class="feature-list">
+          <li>Swing timing control</li>
+          <li>Per-row volume faders</li>
+          <li>Piano Roll for each melodic row</li>
+          <li>Add unlimited rows</li>
+          <li>Randomize patterns</li>
+        </ul>
       </div>
 
       <div class="feature-card" data-animate>
         <div class="feature-card-bg" style="--c:#06B6D4"></div>
         <div class="feature-icon">🎹</div>
         <h3>Playable Keyboard</h3>
-        <p>Two octaves, mouse or QWERTY keys. In-scale notes glow so you always know which keys sound good — beginners play like pros instantly.</p>
+        <p>Two octaves you can play with mouse or keyboard shortcuts. In-scale notes glow automatically — beginners sound musical immediately, pros can lay down melodies fast.</p>
+        <ul class="feature-list">
+          <li>6 scales: Major, Minor, Pentatonic, Blues, Dorian, Mixolydian</li>
+          <li>Octave up/down (Z/X keys)</li>
+          <li>Touch / mobile support</li>
+          <li>Record-to-sequencer mode</li>
+        </ul>
       </div>
 
       <div class="feature-card" data-animate>
-        <div class="feature-card-bg" style="--c:#F59E0B"></div>
+        <div class="feature-card-bg" style="--c:#EF4444"></div>
         <div class="feature-icon">🥁</div>
         <h3>Drum Machine</h3>
-        <p>4×4 velocity-sensitive pads. Choose from Acoustic, Electronic, Lo-Fi, or Trap kits. Every pad mapped to keyboard shortcuts for fast performance.</p>
+        <p>16 velocity-sensitive pads in a 4×4 grid. Every pad has a keyboard shortcut for live performance. Switch between four drum kits: Acoustic, Electronic, Lo-Fi, and Trap.</p>
+        <ul class="feature-list">
+          <li>4 drum kits</li>
+          <li>Keyboard-mapped shortcuts</li>
+          <li>Web Audio synthesis</li>
+          <li>Hit animation + flash</li>
+        </ul>
       </div>
 
       <div class="feature-card" data-animate>
         <div class="feature-card-bg" style="--c:#A855F7"></div>
         <div class="feature-icon">🎼</div>
         <h3>Chord Pads</h3>
-        <p>Eight pads pre-loaded from your AI progression. Tap to play full chords — no music theory needed. Ripple animations on every hit.</p>
+        <p>Eight pads pre-loaded with your AI chord progression. One click plays a full chord. Ripple animations on every hit. Connect the Arpeggiator to auto-arpeggiate any chord.</p>
+        <ul class="feature-list">
+          <li>AI-loaded progressions</li>
+          <li>Ripple touch animation</li>
+          <li>Arpeggiator integration</li>
+          <li>Up / Down / Random modes</li>
+        </ul>
       </div>
 
+      <!-- BIG CARD: Visualizer -->
       <div class="feature-card feature-large" data-animate>
         <div class="feature-card-bg" style="--c:#06B6D4"></div>
-        <div class="feature-icon-wrap">
-          <div class="feature-icon">✨</div>
-        </div>
+        <div class="feature-icon-wrap"><div class="feature-icon">✨</div></div>
         <h3>Audio-Reactive Visualizer</h3>
-        <p>Three stunning modes that respond in real time — Particle Field with physics simulation, Waveform oscillation, and Frequency Bars. Colors shift with your mood setting. 60fps. Zero lag.</p>
-        <div class="feature-viz-preview">
-          <canvas id="feature-viz-canvas"></canvas>
+        <p>Three full-canvas modes that react to everything playing through the audio engine in real time. Colors shift with your mood. Runs at 60fps using the Canvas API and Web Audio Analyser node — zero performance cost.</p>
+        <div class="viz-modes-preview">
+          <div class="viz-mode-demo">
+            <div class="viz-dots"></div>
+            <span>Particle Field</span>
+          </div>
+          <div class="viz-mode-demo">
+            <div class="viz-wave"></div>
+            <span>Waveform</span>
+          </div>
+          <div class="viz-mode-demo">
+            <div class="viz-bars-demo">
+              <span></span><span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <span>Frequency Bars</span>
+          </div>
         </div>
       </div>
 
       <div class="feature-card" data-animate>
         <div class="feature-card-bg" style="--c:#EC4899"></div>
         <div class="feature-icon">🎚️</div>
-        <h3>Mixer</h3>
-        <p>Professional channel strips with volume faders, pan, mute/solo, and live level meters that bounce with every beat.</p>
+        <h3>Mixer + Live Meters</h3>
+        <p>A channel strip for every sequencer row with volume faders, mute/solo buttons, and level meters that bounce in time with each beat. Master volume on the transport bar.</p>
+        <ul class="feature-list">
+          <li>Per-channel volume</li>
+          <li>Mute and Solo</li>
+          <li>Live VU meters</li>
+          <li>Auto-synced from sequencer</li>
+        </ul>
       </div>
 
       <div class="feature-card" data-animate>
         <div class="feature-card-bg" style="--c:#10B981"></div>
         <div class="feature-icon">🔊</div>
         <h3>Effects Rack</h3>
-        <p>Reverb, BPM-synced delay, and distortion. Toggle any effect instantly — add warmth, space, or grit to the master output.</p>
+        <p>Four professional-grade effects on the master output, each with a toggle switch and continuous amount slider. All implemented with Web Audio API nodes.</p>
+        <ul class="feature-list">
+          <li>Reverb (Convolver)</li>
+          <li>BPM-synced Delay</li>
+          <li>Distortion (WaveShaper)</li>
+          <li>Dynamics Compressor</li>
+        </ul>
       </div>
 
       <div class="feature-card" data-animate>
         <div class="feature-card-bg" style="--c:#6366F1"></div>
         <div class="feature-icon">🎵</div>
-        <h3>AI Melody Generator</h3>
-        <p>Click once and Groq writes a melodic phrase in your current scale and mood. Keep it, tweak it, or regenerate until it's perfect.</p>
+        <h3>Piano Roll Editor</h3>
+        <p>Open a full piano roll for any melodic row in the sequencer. Click cells to place notes across all octaves, clear, or randomize. Your edits sync back instantly.</p>
+        <ul class="feature-list">
+          <li>Per-row note editing</li>
+          <li>36 pitch rows (3 octaves)</li>
+          <li>Click to toggle notes</li>
+          <li>Randomize button</li>
+        </ul>
+      </div>
+
+      <div class="feature-card" data-animate>
+        <div class="feature-card-bg" style="--c:#F59E0B"></div>
+        <div class="feature-icon">🌀</div>
+        <h3>Arpeggiator</h3>
+        <p>Set the mode and rate, hold a chord pad — the arpeggiator plays individual notes of the chord in sequence, synced perfectly to your BPM.</p>
+        <ul class="feature-list">
+          <li>Up / Down / Up-Down / Random</li>
+          <li>1/4, 1/8, 1/16 note rates</li>
+          <li>BPM-synced timing</li>
+          <li>Works with Chord Pads</li>
+        </ul>
       </div>
 
       <div class="feature-card" data-animate>
         <div class="feature-card-bg" style="--c:#EC4899"></div>
         <div class="feature-icon">⬇️</div>
         <h3>Record & Export</h3>
-        <p>Capture everything playing through the Web Audio API. Export your track as a WAV file named automatically by mood and BPM.</p>
+        <p>Capture the full mixed output of the Web Audio engine. Hit record, play your track, stop — and download a real audio file named automatically by mood and BPM.</p>
+        <ul class="feature-list">
+          <li>MediaRecorder API</li>
+          <li>All effects included in export</li>
+          <li>Auto-named by mood + BPM</li>
+          <li>No upload or processing</li>
+        </ul>
       </div>
+
+      <div class="feature-card" data-animate>
+        <div class="feature-card-bg" style="--c:#10B981"></div>
+        <div class="feature-icon">💾</div>
+        <h3>Project Save & Load</h3>
+        <p>Save up to 10 projects to your browser's localStorage. Each project stores the full sequencer pattern, BPM, and row configuration. Load any project in one click.</p>
+        <ul class="feature-list">
+          <li>Up to 10 saved projects</li>
+          <li>Pattern + BPM + rows</li>
+          <li>No account needed</li>
+          <li>Share link via clipboard</li>
+        </ul>
+      </div>
+
     </div>
   </section>
 
-  <!-- HOW IT WORKS -->
-  <section class="how-section" id="how-it-works">
-    <div class="section-header">
-      <span class="badge badge-purple">Three Steps</span>
-      <h2 class="section-title">From Nothing to <span class="gradient-text">A Real Track</span></h2>
-    </div>
-    <div class="steps-row">
-      <div class="step-card" data-animate>
-        <div class="step-num">01</div>
-        <div class="step-icon">🤖</div>
-        <h3>Describe Your Vibe</h3>
-        <p>Pick a mood, genre, and BPM. Add a text description. Hit Generate and Groq builds your foundation in under a second.</p>
-      </div>
-      <div class="step-arrow">→</div>
-      <div class="step-card" data-animate>
-        <div class="step-num">02</div>
-        <div class="step-icon">🎛️</div>
-        <h3>Layer & Customize</h3>
-        <p>The AI loads your chord progression and drum patterns into the studio. Add layers, play the keyboard, tweak the sequencer.</p>
-      </div>
-      <div class="step-arrow">→</div>
-      <div class="step-card" data-animate>
-        <div class="step-num">03</div>
-        <div class="step-icon">⬇️</div>
-        <h3>Export Your Track</h3>
-        <p>Hit Record, play your track, stop — and download a real audio file. Share it, post it, use it anywhere.</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- PRESETS -->
-  <section class="presets-section">
+  <!-- ===== PRESETS ===== -->
+  <section class="presets-section" id="presets">
     <div class="section-header">
       <span class="badge badge-amber">Ready to Play</span>
       <h2 class="section-title">Start from a <span class="gradient-text-warm">Preset</span></h2>
-      <p class="section-sub">Six hand-crafted tracks, each fully editable in the studio.</p>
+      <p class="section-sub">Six fully editable starting tracks — click any to open the studio with it loaded.</p>
     </div>
     <div class="presets-grid">
       <a href="studio.html?preset=lofi" class="preset-card" data-animate>
         <div class="preset-visual" style="--c:#6366F1">
-          <div class="preset-bars">
-            <span></span><span></span><span></span><span></span><span></span><span></span>
-          </div>
+          <div class="preset-bars"><span></span><span></span><span></span><span></span><span></span><span></span></div>
         </div>
         <div class="preset-info">
           <div class="preset-emoji">🌙</div>
           <div>
             <div class="preset-name">Lo-Fi Beat</div>
-            <div class="preset-meta">Melancholic · 75 BPM</div>
+            <div class="preset-meta">Melancholic · 75 BPM · C minor</div>
           </div>
         </div>
         <div class="preset-arrow">→</div>
       </a>
       <a href="studio.html?preset=cinematic" class="preset-card" data-animate>
         <div class="preset-visual" style="--c:#06B6D4">
-          <div class="preset-bars">
-            <span></span><span></span><span></span><span></span><span></span><span></span>
-          </div>
+          <div class="preset-bars"><span></span><span></span><span></span><span></span><span></span><span></span></div>
         </div>
         <div class="preset-info">
           <div class="preset-emoji">🎬</div>
           <div>
             <div class="preset-name">Cinematic Swell</div>
-            <div class="preset-meta">Dreamy · 60 BPM</div>
+            <div class="preset-meta">Dreamy · 60 BPM · C minor</div>
           </div>
         </div>
         <div class="preset-arrow">→</div>
       </a>
       <a href="studio.html?preset=trap" class="preset-card" data-animate>
         <div class="preset-visual" style="--c:#EF4444">
-          <div class="preset-bars">
-            <span></span><span></span><span></span><span></span><span></span><span></span>
-          </div>
+          <div class="preset-bars"><span></span><span></span><span></span><span></span><span></span><span></span></div>
         </div>
         <div class="preset-info">
           <div class="preset-emoji">🔥</div>
           <div>
             <div class="preset-name">Trap Pattern</div>
-            <div class="preset-meta">Aggressive · 140 BPM</div>
+            <div class="preset-meta">Aggressive · 140 BPM · D minor</div>
           </div>
         </div>
         <div class="preset-arrow">→</div>
       </a>
       <a href="studio.html?preset=jazz" class="preset-card" data-animate>
         <div class="preset-visual" style="--c:#F59E0B">
-          <div class="preset-bars">
-            <span></span><span></span><span></span><span></span><span></span><span></span>
-          </div>
+          <div class="preset-bars"><span></span><span></span><span></span><span></span><span></span><span></span></div>
         </div>
         <div class="preset-info">
           <div class="preset-emoji">🎷</div>
           <div>
             <div class="preset-name">Jazz Progression</div>
-            <div class="preset-meta">Happy · 120 BPM</div>
+            <div class="preset-meta">Happy · 120 BPM · C major</div>
           </div>
         </div>
         <div class="preset-arrow">→</div>
       </a>
       <a href="studio.html?preset=dreamy" class="preset-card" data-animate>
         <div class="preset-visual" style="--c:#06B6D4">
-          <div class="preset-bars">
-            <span></span><span></span><span></span><span></span><span></span><span></span>
-          </div>
+          <div class="preset-bars"><span></span><span></span><span></span><span></span><span></span><span></span></div>
         </div>
         <div class="preset-info">
           <div class="preset-emoji">💫</div>
           <div>
             <div class="preset-name">Dreamy Ambient</div>
-            <div class="preset-meta">Dreamy · 80 BPM</div>
+            <div class="preset-meta">Dreamy · 80 BPM · C major</div>
           </div>
         </div>
         <div class="preset-arrow">→</div>
       </a>
       <a href="studio.html?preset=edm" class="preset-card" data-animate>
         <div class="preset-visual" style="--c:#A855F7">
-          <div class="preset-bars">
-            <span></span><span></span><span></span><span></span><span></span><span></span>
-          </div>
+          <div class="preset-bars"><span></span><span></span><span></span><span></span><span></span><span></span></div>
         </div>
         <div class="preset-info">
           <div class="preset-emoji">⚡</div>
           <div>
             <div class="preset-name">Electronic Dance</div>
-            <div class="preset-meta">Euphoric · 128 BPM</div>
+            <div class="preset-meta">Euphoric · 128 BPM · A minor</div>
           </div>
         </div>
         <div class="preset-arrow">→</div>
@@ -453,18 +529,70 @@
     </div>
   </section>
 
-  <!-- CTA -->
+  <!-- ===== KEYBOARD SHORTCUTS ===== -->
+  <section class="shortcuts-section">
+    <div class="section-header">
+      <span class="badge badge-purple">Power User Ready</span>
+      <h2 class="section-title">Every Key Mapped. <span class="gradient-text">Play It Live.</span></h2>
+    </div>
+    <div class="shortcuts-showcase">
+      <div class="shortcut-group-card" data-animate>
+        <div class="sc-icon">⌨️</div>
+        <h4>Transport</h4>
+        <div class="sc-list">
+          <div class="sc-item"><kbd>Space</kbd><span>Play / Pause</span></div>
+          <div class="sc-item"><kbd>R</kbd><span>Toggle Record</span></div>
+          <div class="sc-item"><kbd>↑ ↓</kbd><span>BPM ±1</span></div>
+          <div class="sc-item"><kbd>?</kbd><span>Shortcut Help</span></div>
+          <div class="sc-item"><kbd>Ctrl+S</kbd><span>Save Project</span></div>
+        </div>
+      </div>
+      <div class="shortcut-group-card" data-animate>
+        <div class="sc-icon">🎹</div>
+        <h4>Piano Keyboard</h4>
+        <div class="sc-list">
+          <div class="sc-item"><kbd>A S D F G H J K</kbd><span>White keys (C→C)</span></div>
+          <div class="sc-item"><kbd>W E T Y U</kbd><span>Black keys</span></div>
+          <div class="sc-item"><kbd>Z</kbd><span>Octave Down</span></div>
+          <div class="sc-item"><kbd>X</kbd><span>Octave Up</span></div>
+        </div>
+      </div>
+      <div class="shortcut-group-card" data-animate>
+        <div class="sc-icon">🥁</div>
+        <h4>Drum Pads</h4>
+        <div class="sc-list">
+          <div class="sc-item"><kbd>Q</kbd><span>Kick</span></div>
+          <div class="sc-item"><kbd>W</kbd><span>Snare</span></div>
+          <div class="sc-item"><kbd>E</kbd><span>Hi-Hat</span></div>
+          <div class="sc-item"><kbd>R</kbd><span>Open Hat</span></div>
+          <div class="sc-item"><kbd>1–8</kbd><span>Pads 9–16</span></div>
+        </div>
+      </div>
+      <div class="shortcut-group-card" data-animate>
+        <div class="sc-icon">🎛️</div>
+        <h4>Studio</h4>
+        <div class="sc-list">
+          <div class="sc-item"><kbd>Ctrl+Z</kbd><span>Clear Sequencer</span></div>
+          <div class="sc-item"><kbd>Ctrl+S</kbd><span>Save Project</span></div>
+          <div class="sc-item"><kbd>?</kbd><span>Show All Shortcuts</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CTA ===== -->
   <section class="cta-section">
     <div class="cta-glow"></div>
     <div class="cta-content" data-animate>
+      <span class="cta-badge">Free · No Account · No Install</span>
       <h2>Ready to Make Something?</h2>
-      <p>No account. No install. Just open the studio and start.</p>
+      <p>Open the studio in one click. Your first track is 60 seconds away.</p>
       <div class="cta-actions">
-        <a href="studio.html?autoGenerate=true" class="btn btn-primary btn-hero">
+        <a href="studio.html?start=pick" class="btn btn-primary btn-hero">
           <span class="btn-glow"></span>
-          🎵 Generate Your First Beat
+          🎵 Open Studio Now
         </a>
-        <a href="gallery.html" class="btn btn-secondary btn-hero">View Gallery →</a>
+        <a href="studio.html?start=ai" class="btn btn-secondary btn-hero">Generate with AI →</a>
       </div>
     </div>
   </section>
@@ -477,34 +605,42 @@
           <div class="logo-mark">⚡</div>
           <span class="logo-text">VibeForge</span>
         </div>
-        <p>AI-powered music creation for everyone.</p>
-        <div class="footer-built">Built with Web Audio API + Groq</div>
+        <p>AI-powered music creation for everyone —<br/>from first-timers to working producers.</p>
+        <div class="footer-built">Built with Web Audio API + Groq AI</div>
+        <div class="footer-social">
+          <a href="https://github.com/Gurutej11-web/VibeForge" target="_blank" class="footer-link-chip">GitHub →</a>
+          <a href="https://console.groq.com" target="_blank" class="footer-link-chip">Groq AI →</a>
+        </div>
       </div>
       <div class="footer-links-group">
         <div class="footer-col">
-          <div class="footer-col-title">Studio</div>
-          <a href="studio.html">Open Studio</a>
-          <a href="studio.html?autoGenerate=true">Generate Beat</a>
+          <div class="footer-col-title">Start Creating</div>
+          <a href="studio.html?start=ai">AI Generate</a>
           <a href="studio.html?preset=lofi">Lo-Fi Preset</a>
+          <a href="studio.html?preset=trap">Trap Preset</a>
+          <a href="studio.html?preset=jazz">Jazz Preset</a>
           <a href="studio.html?preset=edm">EDM Preset</a>
+          <a href="studio.html">Blank Studio</a>
         </div>
         <div class="footer-col">
-          <div class="footer-col-title">Explore</div>
-          <a href="gallery.html">Gallery</a>
-          <a href="#features">Features</a>
-          <a href="#how-it-works">How It Works</a>
+          <div class="footer-col-title">Learn</div>
+          <a href="#how-it-works">Quick Start</a>
+          <a href="#features">All Features</a>
+          <a href="#presets">Presets</a>
+          <a href="studio.html?start=pick">Pick a Style</a>
         </div>
         <div class="footer-col">
           <div class="footer-col-title">Tech</div>
           <a href="https://console.groq.com" target="_blank">Groq AI</a>
           <a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API" target="_blank">Web Audio API</a>
+          <a href="https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API" target="_blank">Canvas API</a>
           <a href="config.example.js">API Key Setup</a>
         </div>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2025 VibeForge</span>
-      <span>Made with ⚡ and Groq</span>
+      <span>© 2025 VibeForge — Make music, share freely.</span>
+      <span>Built with ⚡ Web Audio API + Groq</span>
     </div>
   </footer>
 
